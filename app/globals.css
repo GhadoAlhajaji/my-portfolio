@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000000;
+  --foreground: #fafafa;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  background-color: #000000 !important;
+  overflow-x: hidden;
+}
+
+@keyframes experience-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.22); }
+  50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.45); }
+}
+
+.experience-card:hover {
+  animation: experience-glow-pulse 2.2s ease-in-out infinite;
+}
