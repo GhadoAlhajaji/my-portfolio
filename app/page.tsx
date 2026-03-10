@@ -1,7 +1,7 @@
  "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Shield,
   FileText,
@@ -23,6 +23,8 @@ import {
   Linkedin,
   Github,
   ExternalLink,
+  Menu,
+  X,
 } from "lucide-react";
 
 const fadeInUp = {
@@ -59,6 +61,7 @@ export default function Home() {
   ];
 
   const [displayedText, setDisplayedText] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const phraseIndexRef = useRef(0);
   const isDeletingRef = useRef(false);
   useEffect(() => {
@@ -208,28 +211,86 @@ export default function Home() {
         id="code-rain-canvas"
         className="pointer-events-none fixed inset-0 -z-10"
       />
-      <header className="sticky top-6 z-50 px-4">
-        <div className="mx-auto mt-6 flex max-w-4xl items-center justify-center rounded-full border border-purple-500/40 bg-gradient-to-r from-black via-[#1e0038] to-black px-6 py-2 backdrop-blur-md">
-          <nav className="flex flex-nowrap items-center justify-center space-x-6 text-sm font-medium tracking-wide text-zinc-300">
+      <header className="sticky top-4 z-50 relative px-4 sm:top-6 md:px-6">
+        <div className="mx-auto flex max-w-4xl items-center justify-between rounded-full border border-purple-500/40 bg-gradient-to-r from-black via-[#1e0038] to-black px-5 py-3 backdrop-blur-md shadow-[0_0_24px_rgba(168,85,247,0.15)] sm:mt-6 sm:px-6 sm:py-2">
+          {/* Logo / Name – left */}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              setMobileMenuOpen(false);
+            }}
+            className="shrink-0 text-sm font-semibold tracking-wide text-zinc-200 transition hover:text-purple-300 sm:text-base"
+          >
+            Ghada
+          </a>
+
+          {/* Desktop nav – hidden on mobile */}
+          <nav className="hidden flex-1 flex-nowrap items-center justify-center space-x-4 text-sm font-medium tracking-wide text-zinc-300 md:flex md:space-x-6">
             {[
               { label: "About", href: "#about" },
               { label: "Education", href: "#education" },
               { label: "Certifications", href: "#certifications" },
               { label: "Experience", href: "#experience" },
-              { label: "Courses & Accomplishments", href: "#accomplishments" },
+              { label: "Accomplishments", href: "#accomplishments" },
               { label: "Projects", href: "#projects" },
               { label: "Contact", href: "#connect" },
             ].map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="whitespace-nowrap transition-all duration-300 hover:text-cyan-300 hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+                className="whitespace-nowrap transition-all duration-300 hover:text-purple-300 hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.9)]"
               >
                 {item.label}
               </a>
             ))}
           </nav>
+
+          {/* Mobile: Hamburger button – right */}
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-purple-500/40 text-zinc-300 transition hover:bg-purple-500/20 hover:text-purple-300 hover:shadow-[0_0_16px_rgba(168,85,247,0.4)] md:hidden"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {/* Mobile dropdown – glassmorphism, purple glow */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-4 right-4 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-purple-500/40 bg-black/90 shadow-[0_0_32px_rgba(168,85,247,0.25)] backdrop-blur-md md:hidden"
+            >
+              <nav className="flex flex-col py-3">
+                {[
+                  { label: "About", href: "#about" },
+                  { label: "Education", href: "#education" },
+                  { label: "Certifications", href: "#certifications" },
+                  { label: "Experience", href: "#experience" },
+                  { label: "Accomplishments", href: "#accomplishments" },
+                  { label: "Projects", href: "#projects" },
+                  { label: "Contact", href: "#connect" },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="border-b border-zinc-800/80 px-5 py-3 text-left text-sm font-medium text-zinc-300 last:border-0 transition hover:bg-purple-500/15 hover:text-purple-300"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-10 font-sans sm:px-6 sm:py-16">
