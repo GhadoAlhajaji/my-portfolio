@@ -282,32 +282,37 @@ export default function Home() {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="fixed left-0 right-0 top-0 z-40 border-b-2 border-purple-500/70 bg-black/50 shadow-[0_4px_24px_rgba(168,85,247,0.35)] backdrop-blur-xl"
           >
-            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-6 gap-y-3 overflow-x-auto px-4 py-4 sm:flex-nowrap sm:justify-center sm:gap-8">
-              {[
-                { label: "About", href: "#about" },
-                { label: "Education", href: "#education" },
-                { label: "Certifications", href: "#certifications" },
-                { label: "Experience", href: "#experience" },
-                { label: "Projects", href: "#projects" },
-                { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
-              ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
-                  onClick={(e) => {
-                    if (item.href.startsWith("#")) {
-                      e.preventDefault();
-                      scrollToSection(item.href);
-                    } else {
-                      setMobileMenuOpen(false);
-                    }
-                  }}
-                  className="whitespace-nowrap text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-                >
-                  {item.label}
-                </a>
-              ))}
+            <div className="relative mx-auto max-w-5xl px-4 py-4 sm:px-6">
+              {/* Mobile: single scrollable row, fade on right; Desktop: centered row */}
+              <div className="nav-links-scroll flex items-center gap-x-[15px] overflow-x-auto whitespace-nowrap py-1 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:overflow-visible sm:whitespace-normal sm:py-0">
+                {[
+                  { label: "About", href: "#about" },
+                  { label: "Education", href: "#education" },
+                  { label: "Certifications", href: "#certifications" },
+                  { label: "Experience", href: "#experience" },
+                  { label: "Projects", href: "#projects" },
+                  { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                    onClick={(e) => {
+                      if (item.href.startsWith("#")) {
+                        e.preventDefault();
+                        scrollToSection(item.href);
+                      } else {
+                        setMobileMenuOpen(false);
+                      }
+                    }}
+                    className="flex-shrink-0 px-3 py-2 text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] sm:px-0 sm:py-0"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+              {/* Right-edge fade on mobile only */}
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black/60 to-transparent sm:hidden" aria-hidden />
             </div>
           </motion.nav>
         )}
