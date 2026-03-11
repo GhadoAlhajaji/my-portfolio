@@ -49,3 +49,27 @@ body {
   display: none;
 }
 
+/* Navbar link – purple underline + dot on hover */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.2rem;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(to right, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.9));
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  border-radius: 999px;
+  transition: width 0.2s ease-out, left 0.2s ease-out;
+}
+
+.nav-link:hover::after {
+  left: 0;
+  width: 100%;
+}
+
