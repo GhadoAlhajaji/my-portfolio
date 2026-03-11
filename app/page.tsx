@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Shield,
+  ShieldCheck,
   FileText,
   Search,
   Cpu,
@@ -24,6 +25,7 @@ import {
   Github,
   ExternalLink,
   Menu,
+  Network,
   X,
 } from "lucide-react";
 
@@ -62,6 +64,11 @@ export default function Home() {
 
   const [displayedText, setDisplayedText] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [activeCertificate, setActiveCertificate] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
   const phraseIndexRef = useRef(0);
   const isDeletingRef = useRef(false);
   useEffect(() => {
@@ -205,97 +212,141 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeCertificate) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveCertificate(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeCertificate]);
+
+  const scrollToSection = (href: string) => {
+    if (href.startsWith("#")) {
+      const id = href.slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      setMobileMenuOpen(false);
+      return;
+    }
+
+    window.open(href, "_blank", "noopener,noreferrer");
+    setMobileMenuOpen(false);
+  };
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 20) {
+        setHasScrolled(true);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="relative min-h-screen font-sans text-zinc-100">
       <canvas
         id="code-rain-canvas"
         className="pointer-events-none fixed inset-0 -z-10"
       />
-      <header className="sticky top-4 z-50 relative px-4 sm:top-6 md:px-6">
-        <div className="mx-auto flex max-w-4xl items-center justify-between rounded-full border border-purple-500/40 bg-gradient-to-r from-black via-[#1e0038] to-black px-5 py-3 backdrop-blur-md shadow-[0_0_24px_rgba(168,85,247,0.15)] sm:mt-6 sm:px-6 sm:py-2">
-          {/* Logo / Name – left */}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              setMobileMenuOpen(false);
-            }}
-            className="shrink-0 text-sm font-semibold tracking-wide text-zinc-200 transition hover:text-purple-300 sm:text-base"
+
+      {/* Floating navigation hub button */}
+      <button
+        type="button"
+        aria-label="Open navigation map"
+        onClick={() => setMobileMenuOpen(true)}
+        className="fixed right-4 top-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-purple-500/70 bg-black/80 text-purple-200 shadow-[0_0_22px_rgba(168,85,247,0.9)] backdrop-blur-xl transition hover:bg-purple-500/30 hover:text-white md:right-6"
+      >
+        <Network className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
+      </button>
+
+      {/* Full-screen navigation overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 flex items-center justify-start bg-black/85 backdrop-blur-2xl"
+            onClick={() => setMobileMenuOpen(false)}
           >
-            Ghada
-          </a>
-
-          {/* Desktop nav – hidden on mobile */}
-          <nav className="hidden flex-1 flex-nowrap items-center justify-center space-x-4 text-sm font-medium tracking-wide text-zinc-300 md:flex md:space-x-6">
-            {[
-              { label: "About", href: "#about" },
-              { label: "Education", href: "#education" },
-              { label: "Certifications", href: "#certifications" },
-              { label: "Experience", href: "#experience" },
-              { label: "Accomplishments", href: "#accomplishments" },
-              { label: "Projects", href: "#projects" },
-              { label: "Contact", href: "#connect" },
-            ].map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="whitespace-nowrap transition-all duration-300 hover:text-purple-300 hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.9)]"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* Mobile: Hamburger button – right */}
-          <button
-            type="button"
-            aria-label="Toggle menu"
-            onClick={() => setMobileMenuOpen((o) => !o)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-purple-500/40 text-zinc-300 transition hover:bg-purple-500/20 hover:text-purple-300 hover:shadow-[0_0_16px_rgba(168,85,247,0.4)] md:hidden"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-
-        {/* Mobile dropdown – glassmorphism, purple glow */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="absolute left-4 right-4 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-purple-500/40 bg-black/90 shadow-[0_0_32px_rgba(168,85,247,0.25)] backdrop-blur-md md:hidden"
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute right-6 top-6 z-50 inline-flex h-9 w-9 items-center justify-center rounded-full border border-purple-500/80 bg-black/80 text-zinc-200 shadow-[0_0_26px_rgba(168,85,247,0.95)] transition hover:bg-purple-500/30 hover:text-white"
             >
-              <nav className="flex flex-col py-3">
+              <X className="h-4 w-4" />
+            </button>
+
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -12 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="relative ml-6 flex w-full max-w-md flex-col items-stretch justify-center px-6 sm:ml-10 md:ml-[60px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.ul
+                className="flex w-full flex-col items-stretch gap-4 text-left font-sans"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: { staggerChildren: 0.08, delayChildren: 0.12 },
+                  },
+                }}
+              >
                 {[
                   { label: "About", href: "#about" },
                   { label: "Education", href: "#education" },
                   { label: "Certifications", href: "#certifications" },
                   { label: "Experience", href: "#experience" },
-                  { label: "Accomplishments", href: "#accomplishments" },
                   { label: "Projects", href: "#projects" },
-                  { label: "Contact", href: "#connect" },
-                ].map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="border-b border-zinc-800/80 px-5 py-3 text-left text-sm font-medium text-zinc-300 last:border-0 transition hover:bg-purple-500/15 hover:text-purple-300"
+                  { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
+                ].map((item, index) => (
+                  <motion.li
+                    key={item.label}
+                    variants={{
+                      hidden: { opacity: 0, x: -10 },
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        transition: { duration: 0.25, ease: "easeOut" },
+                      },
+                    }}
                   >
-                    {item.label}
-                  </a>
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection(item.href)}
+                      className="group flex w-full cursor-pointer items-baseline gap-3 text-left"
+                    >
+                      <span className="text-xs font-mono text-purple-300/70">
+                        {`0${index + 1}.`}
+                      </span>
+                      <span className="text-base font-semibold text-zinc-200 transition-colors group-hover:text-purple-300">
+                        {item.label}
+                      </span>
+                    </button>
+                  </motion.li>
                 ))}
-              </nav>
+              </motion.ul>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-10 font-sans sm:px-6 sm:py-16">
         {/* Minimal, centered hero – fade in and slide up on load */}
-        <section className="relative flex min-h-[70vh] flex-col items-center justify-center gap-6 overflow-hidden border-b border-zinc-900 pb-12 text-center">
+        <section className="relative flex min-h-[70vh] flex-col items-center justify-center gap-6 overflow-hidden border-b border-zinc-900 pb-16 text-center sm:min-h-[80vh]">
           <motion.div
             className="space-y-4"
             initial="hidden"
@@ -366,6 +417,27 @@ export default function Home() {
               Blog
             </motion.a>
           </motion.div>
+
+          {/* Scroll-down indicator – bottom center, hidden after scroll */}
+          {!hasScrolled && (
+            <motion.div
+              className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-xs text-purple-300/70 sm:bottom-8"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 0.8, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <motion.div
+                className="flex flex-col items-center gap-1"
+                animate={{ y: [0, -6, 0], opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="font-mono text-[0.6rem] tracking-[0.25em] text-purple-400/80">
+                  SCROLL
+                </span>
+                <div className="h-7 w-px bg-gradient-to-b from-purple-500/70 via-purple-400/40 to-transparent" />
+              </motion.div>
+            </motion.div>
+          )}
         </section>
 
         {/* Content sections */}
@@ -593,11 +665,15 @@ export default function Home() {
                   },
                 }}
               >
-                <a
-                  href="/cysa-cert.png"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mb-3 block overflow-hidden rounded-lg border border-purple-500/70 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveCertificate({
+                      src: "/cysa-cert.png",
+                      alt: "CompTIA CySA+ Certificate",
+                    })
+                  }
+                  className="mb-3 block w-full overflow-hidden rounded-lg border border-purple-500/70 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.5)] focus:outline-none focus:ring-2 focus:ring-purple-400/80"
                 >
                   <div className="relative">
                     <img
@@ -612,7 +688,7 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                </a>
+                </button>
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600/20 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.7)]">
                     <Award className="h-5 w-5" strokeWidth={1.8} />
@@ -629,15 +705,19 @@ export default function Home() {
                   Validates hands-on skills in incident response, threat management, security monitoring, and
                   tuning defenses in real-world SOC environments.
                 </p>
-                <a
-                  href="/cysa-cert.png"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 rounded-full border border-purple-500/60 bg-black/40 px-3 py-1 text-[0.7rem] font-medium text-purple-100 transition hover:bg-purple-600/20 hover:shadow-[0_0_18px_rgba(168,85,247,0.9)]"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveCertificate({
+                      src: "/cysa-cert.png",
+                      alt: "CompTIA CySA+ Certificate",
+                    })
+                  }
+                  className="mt-3 inline-flex items-center gap-1 rounded-full border border-purple-500/60 bg-black/40 px-3 py-1 text-[0.7rem] font-medium text-purple-100 transition hover:bg-purple-600/20 hover:shadow-[0_0_18px_rgba(168,85,247,0.9)] focus:outline-none focus:ring-2 focus:ring-purple-400/80"
                 >
                   <Search className="h-3.5 w-3.5" strokeWidth={1.7} />
                   View Certificate
-                </a>
+                </button>
               </motion.article>
 
               {/* Verified – eJPT */}
@@ -653,11 +733,15 @@ export default function Home() {
                   },
                 }}
               >
-                <a
-                  href="/ejpt-cert.png"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mb-3 block overflow-hidden rounded-lg border border-purple-500/70 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveCertificate({
+                      src: "/ejpt-cert.png",
+                      alt: "eJPT Certificate",
+                    })
+                  }
+                  className="mb-3 block w-full overflow-hidden rounded-lg border border-purple-500/70 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.5)] focus:outline-none focus:ring-2 focus:ring-purple-400/80"
                 >
                   <div className="relative">
                     <img
@@ -672,7 +756,7 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                </a>
+                </button>
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600/20 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.7)]">
                     <Award className="h-5 w-5" strokeWidth={1.8} />
@@ -687,15 +771,19 @@ export default function Home() {
                   Demonstrates practical penetration testing skills in network analysis, vulnerability assessment,
                   exploitation, and reporting in lab-style environments.
                 </p>
-                <a
-                  href="/ejpt-cert.png"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 rounded-full border border-purple-500/60 bg-black/40 px-3 py-1 text-[0.7rem] font-medium text-purple-100 transition hover:bg-purple-600/20 hover:shadow-[0_0_18px_rgba(168,85,247,0.9)]"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveCertificate({
+                      src: "/ejpt-cert.png",
+                      alt: "eJPT Certificate",
+                    })
+                  }
+                  className="mt-3 inline-flex items-center gap-1 rounded-full border border-purple-500/60 bg-black/40 px-3 py-1 text-[0.7rem] font-medium text-purple-100 transition hover:bg-purple-600/20 hover:shadow-[0_0_18px_rgba(168,85,247,0.9)] focus:outline-none focus:ring-2 focus:ring-purple-400/80"
                 >
                   <Search className="h-3.5 w-3.5" strokeWidth={1.7} />
                   View Certificate
-                </a>
+                </button>
               </motion.article>
 
               {/* In progress – ECDFP */}
@@ -849,13 +937,13 @@ export default function Home() {
                 &lt; 05. Courses &amp; Accomplishments /&gt;
               </h2>
             </div>
-            <div className="mx-auto max-w-4xl py-20">
+            <div className="mx-auto max-w-4xl py-16 sm:py-20">
               <div className="relative pb-2 pt-1">
                 <div
-                  className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-purple-400 via-cyan-400 to-zinc-700 shadow-[0_0_18px_rgba(56,189,248,0.75)]"
+                  className="pointer-events-none absolute inset-y-0 left-4 w-px translate-x-0 bg-gradient-to-b from-purple-400 via-cyan-400 to-zinc-700 shadow-[0_0_18px_rgba(56,189,248,0.75)] md:left-1/2 md:-translate-x-1/2"
                   aria-hidden
                 />
-                <div className="space-y-6 sm:space-y-8">
+                <div className="space-y-7 sm:space-y-8">
                   {[
                     {
                       id: "kaust-3",
@@ -1007,11 +1095,11 @@ export default function Home() {
                         }}
                       >
                         <div className="relative">
-                          <div className="absolute left-1/2 top-4 -translate-x-1/2">
+                          <div className="absolute left-4 top-4 translate-x-0 md:left-1/2 md:-translate-x-1/2">
                             <div className="h-3 w-3 rounded-full bg-cyan-400 shadow-[0_0_0_4px_rgba(8,47,73,0.9)]" />
                           </div>
                           <div
-                            className={`relative ${index === 0 ? "mt-10" : "mt-6"} w-full pl-8 md:w-1/2 md:pl-0 ${
+                            className={`relative ${index === 0 ? "mt-10" : "mt-8"} w-full pl-10 pr-3 sm:pr-4 md:w-1/2 md:pl-0 md:pr-0 ${
                               isLeft ? "md:pr-10 md:mr-auto" : "md:pl-10 md:ml-auto"
                             }`}
                           >
@@ -1388,9 +1476,48 @@ export default function Home() {
         </section>
       </main>
 
+      {/* Certificate lightbox modal */}
+      <AnimatePresence>
+        {activeCertificate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xl"
+            onClick={() => setActiveCertificate(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.25, type: "spring", stiffness: 260, damping: 24 }}
+              className="relative mx-4 w-full max-w-3xl rounded-2xl border border-purple-500/60 bg-black/90 p-3 shadow-[0_0_40px_rgba(168,85,247,0.8)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label="Close certificate preview"
+                onClick={() => setActiveCertificate(null)}
+                className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-purple-500/60 bg-black/70 text-zinc-200 shadow-[0_0_16px_rgba(168,85,247,0.7)] transition hover:bg-purple-500/25 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="mt-6 flex justify-center">
+                <img
+                  src={activeCertificate.src}
+                  alt={activeCertificate.alt}
+                  className="max-h-[80vh] w-full max-w-full rounded-lg border border-purple-500/60 object-contain"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <footer className="border-t border-zinc-900/80 bg-black/80 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 text-[0.7rem] text-zinc-500 sm:px-6">
-          <span>&copy; {new Date().getFullYear()} Your Name. All rights reserved.</span>
+          <span>&copy; 2026 Ghada Alhajajji. All rights reserved.</span>
           <span className="hidden sm:inline">
             Focused on AI security, cryptography, and digital forensics.
           </span>
