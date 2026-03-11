@@ -62,7 +62,6 @@ export default function Home() {
   ];
 
   const [displayedText, setDisplayedText] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [activeCertificate, setActiveCertificate] = useState<{
     src: string;
@@ -231,20 +230,15 @@ export default function Home() {
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-      setMobileMenuOpen(false);
       return;
     }
 
     window.open(href, "_blank", "noopener,noreferrer");
-    setMobileMenuOpen(false);
   };
   useEffect(() => {
     const onScroll = () => {
       if (window.scrollY > 20) {
         setHasScrolled(true);
-      }
-      if (window.scrollY > 30) {
-        setMobileMenuOpen(false);
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -258,67 +252,42 @@ export default function Home() {
         className="pointer-events-none fixed inset-0 -z-10"
       />
 
-      {/* Trigger: glowing Shield/Menu button – top right, clear hit box */}
-      <button
-        type="button"
-        aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
-        onClick={() => setMobileMenuOpen((open) => !open)}
-        className="fixed right-5 top-5 z-[60] flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-purple-500/70 bg-black/80 text-purple-200 shadow-[0_0_22px_rgba(168,85,247,0.9)] backdrop-blur-xl transition hover:bg-purple-500/30 hover:text-white md:right-6"
-      >
-        {mobileMenuOpen ? (
-          <X className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
-        ) : (
-          <ShieldCheck className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
-        )}
-      </button>
+      {/* Modern floating navbar – centered links, purple glassmorphism */}
+      <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4 sm:px-6 sm:pt-5">
+        <div className="flex w-full max-w-3xl items-center justify-center rounded-2xl border border-[rgba(168,85,247,0.3)] bg-[rgba(10,5,15,0.8)] px-5 py-2.5 shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-[12px] sm:rounded-full sm:px-8 sm:py-3">
+          {/* Links – centered */}
+          <nav className="nav-links-scroll flex items-center gap-x-2 overflow-x-auto whitespace-nowrap sm:gap-x-6 sm:overflow-visible sm:whitespace-normal sm:justify-center">
+            {[
+              { label: "ABOUT", href: "#about" },
+              { label: "EDUCATION", href: "#education" },
+              { label: "CERTIFICATIONS", href: "#certifications" },
+              { label: "EXPERIENCE", href: "#experience" },
+              { label: "PROJECTS", href: "#projects" },
+              { label: "BLOG", href: "https://medium.com/@ghadohajaji", external: true },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                onClick={(e) => {
+                  if (item.href.startsWith("#")) {
+                    e.preventDefault();
+                    scrollToSection(item.href);
+                  } else {
+                    e.preventDefault();
+                    scrollToSection(item.href);
+                  }
+                }}
+                className="nav-link px-3 py-2 text-[0.7rem] font-mono font-medium uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:text-purple-300 sm:px-2"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </header>
 
-      {/* On-demand navbar: slides down from top, glassmorphism, purple bottom border */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, y: -24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed left-0 right-0 top-0 z-40 border-b-2 border-purple-500/70 bg-black/50 shadow-[0_4px_24px_rgba(168,85,247,0.35)] backdrop-blur-xl"
-          >
-            <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-4 sm:px-6 sm:pt-20 sm:pb-4">
-              {/* Mobile: single scrollable row, fade on right; Desktop: centered row */}
-              <div className="nav-links-scroll flex items-center gap-x-[15px] gap-y-2 overflow-x-auto whitespace-nowrap py-3 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-0 sm:py-0">
-                {[
-                  { label: "About", href: "#about" },
-                  { label: "Education", href: "#education" },
-                  { label: "Certifications", href: "#certifications" },
-                  { label: "Experience", href: "#experience" },
-                  { label: "Projects", href: "#projects" },
-                  { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
-                ].map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
-                    onClick={(e) => {
-                      if (item.href.startsWith("#")) {
-                        e.preventDefault();
-                        scrollToSection(item.href);
-                      } else {
-                        setMobileMenuOpen(false);
-                      }
-                    }}
-                    className="flex-shrink-0 px-3 py-3 text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] sm:px-0 sm:py-0"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-              {/* Right-edge fade on mobile only */}
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black/60 to-transparent sm:hidden" aria-hidden />
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-
-      <main className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-10 font-sans sm:px-6 sm:py-16">
+      <main className="mx-auto mt-20 flex max-w-5xl flex-col gap-16 px-4 py-10 font-sans sm:mt-24 sm:px-6 sm:py-16">
         {/* Minimal, centered hero – fade in and slide up on load */}
         <section className="relative flex min-h-[70vh] flex-col items-center justify-center gap-6 overflow-hidden border-b border-zinc-900 pb-16 text-center sm:min-h-[80vh]">
           <motion.div
