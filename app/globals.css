@@ -26,3 +26,17 @@ body {
 .experience-card:hover {
   animation: experience-glow-pulse 2.2s ease-in-out infinite;
 }
+
+@keyframes status-breathe {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.status-indicator {
+  animation: status-breathe 2.6s ease-in-out infinite;
+}
+
