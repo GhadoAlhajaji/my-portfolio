@@ -258,12 +258,12 @@ export default function Home() {
         className="pointer-events-none fixed inset-0 -z-10"
       />
 
-      {/* Trigger: glowing Shield/Menu button – top right */}
+      {/* Trigger: glowing Shield/Menu button – top right, clear hit box */}
       <button
         type="button"
         aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
         onClick={() => setMobileMenuOpen((open) => !open)}
-        className="fixed right-4 top-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-purple-500/70 bg-black/80 text-purple-200 shadow-[0_0_22px_rgba(168,85,247,0.9)] backdrop-blur-xl transition hover:bg-purple-500/30 hover:text-white md:right-6"
+        className="fixed right-5 top-5 z-[60] flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-purple-500/70 bg-black/80 text-purple-200 shadow-[0_0_22px_rgba(168,85,247,0.9)] backdrop-blur-xl transition hover:bg-purple-500/30 hover:text-white md:right-6"
       >
         {mobileMenuOpen ? (
           <X className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
@@ -282,9 +282,9 @@ export default function Home() {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="fixed left-0 right-0 top-0 z-40 border-b-2 border-purple-500/70 bg-black/50 shadow-[0_4px_24px_rgba(168,85,247,0.35)] backdrop-blur-xl"
           >
-            <div className="relative mx-auto max-w-5xl px-4 py-4 sm:px-6">
+            <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-4 sm:px-6 sm:pt-20 sm:pb-4">
               {/* Mobile: single scrollable row, fade on right; Desktop: centered row */}
-              <div className="nav-links-scroll flex items-center gap-x-[15px] overflow-x-auto whitespace-nowrap py-1 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:overflow-visible sm:whitespace-normal sm:py-0">
+              <div className="nav-links-scroll flex items-center gap-x-[15px] gap-y-2 overflow-x-auto whitespace-nowrap py-3 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-0 sm:py-0">
                 {[
                   { label: "About", href: "#about" },
                   { label: "Education", href: "#education" },
@@ -305,7 +305,7 @@ export default function Home() {
                         setMobileMenuOpen(false);
                       }
                     }}
-                    className="flex-shrink-0 px-3 py-2 text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] sm:px-0 sm:py-0"
+                    className="flex-shrink-0 px-3 py-3 text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] sm:px-0 sm:py-0"
                   >
                     {item.label}
                   </a>
