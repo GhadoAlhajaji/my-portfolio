@@ -25,7 +25,6 @@ import {
   Github,
   ExternalLink,
   Menu,
-  Network,
   X,
 } from "lucide-react";
 
@@ -244,6 +243,9 @@ export default function Home() {
       if (window.scrollY > 20) {
         setHasScrolled(true);
       }
+      if (window.scrollY > 30) {
+        setMobileMenuOpen(false);
+      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -256,91 +258,58 @@ export default function Home() {
         className="pointer-events-none fixed inset-0 -z-10"
       />
 
-      {/* Floating navigation hub button */}
+      {/* Trigger: glowing Shield/Menu button – top right */}
       <button
         type="button"
-        aria-label="Open navigation map"
-        onClick={() => setMobileMenuOpen(true)}
+        aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
+        onClick={() => setMobileMenuOpen((open) => !open)}
         className="fixed right-4 top-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-purple-500/70 bg-black/80 text-purple-200 shadow-[0_0_22px_rgba(168,85,247,0.9)] backdrop-blur-xl transition hover:bg-purple-500/30 hover:text-white md:right-6"
       >
-        <Network className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
+        {mobileMenuOpen ? (
+          <X className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
+        ) : (
+          <ShieldCheck className="h-5 w-5 text-purple-300 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
+        )}
       </button>
 
-      {/* Full-screen navigation overlay */}
+      {/* On-demand navbar: slides down from top, glassmorphism, purple bottom border */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 flex items-center justify-start bg-black/85 backdrop-blur-2xl"
-            onClick={() => setMobileMenuOpen(false)}
+          <motion.nav
+            initial={{ opacity: 0, y: -24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed left-0 right-0 top-0 z-40 border-b-2 border-purple-500/70 bg-black/50 shadow-[0_4px_24px_rgba(168,85,247,0.35)] backdrop-blur-xl"
           >
-            <button
-              type="button"
-              aria-label="Close navigation menu"
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute right-6 top-6 z-50 inline-flex h-9 w-9 items-center justify-center rounded-full border border-purple-500/80 bg-black/80 text-zinc-200 shadow-[0_0_26px_rgba(168,85,247,0.95)] transition hover:bg-purple-500/30 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -12 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="relative ml-6 flex w-full max-w-md flex-col items-stretch justify-center px-6 sm:ml-10 md:ml-[60px]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <motion.ul
-                className="flex w-full flex-col items-stretch gap-4 text-left font-sans"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: {
-                    transition: { staggerChildren: 0.08, delayChildren: 0.12 },
-                  },
-                }}
-              >
-                {[
-                  { label: "About", href: "#about" },
-                  { label: "Education", href: "#education" },
-                  { label: "Certifications", href: "#certifications" },
-                  { label: "Experience", href: "#experience" },
-                  { label: "Projects", href: "#projects" },
-                  { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
-                ].map((item, index) => (
-                  <motion.li
-                    key={item.label}
-                    variants={{
-                      hidden: { opacity: 0, x: -10 },
-                      visible: {
-                        opacity: 1,
-                        x: 0,
-                        transition: { duration: 0.25, ease: "easeOut" },
-                      },
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => scrollToSection(item.href)}
-                      className="group flex w-full cursor-pointer items-baseline gap-3 text-left"
-                    >
-                      <span className="text-xs font-mono text-purple-300/70">
-                        {`0${index + 1}.`}
-                      </span>
-                      <span className="text-base font-semibold text-zinc-200 transition-colors group-hover:text-purple-300">
-                        {item.label}
-                      </span>
-                    </button>
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </motion.div>
-          </motion.div>
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-6 gap-y-3 overflow-x-auto px-4 py-4 sm:flex-nowrap sm:justify-center sm:gap-8">
+              {[
+                { label: "About", href: "#about" },
+                { label: "Education", href: "#education" },
+                { label: "Certifications", href: "#certifications" },
+                { label: "Experience", href: "#experience" },
+                { label: "Projects", href: "#projects" },
+                { label: "Blog", href: "https://medium.com/@ghadohajaji", external: true },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                  onClick={(e) => {
+                    if (item.href.startsWith("#")) {
+                      e.preventDefault();
+                      scrollToSection(item.href);
+                    } else {
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  className="whitespace-nowrap text-sm font-medium text-zinc-200 transition hover:text-purple-300 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </motion.nav>
         )}
       </AnimatePresence>
 
